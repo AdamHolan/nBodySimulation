@@ -69,10 +69,11 @@ class Particle():
             
         theta = m.atan2(dy, dx)
         force = 0.2 * self.mass * other.mass / dist**2
-        
-        self.accelerate((theta - 0.5 * m.pi, force/self.mass))
-        other.accelerate((theta + 0.5 * m.pi, force/other.mass))
-
+        try: 
+            self.accelerate((theta - 0.5 * m.pi, force/self.mass))
+            other.accelerate((theta + 0.5 * m.pi, force/other.mass))
+        except ZeroDivisionError:
+            pass
         return force
 
     def accelerate(self, vector):
@@ -125,7 +126,7 @@ sprites = []
 # miniguy = Particle(width/3, height-100, 2, 10, 0, .6)
 # sprites.append(miniguy)
 # Do NOT remove
-dummy = Particle(width+10, height+10, 0.00001, 0)
+dummy = Particle(width+10, height+10, 0, 0)
 sprites.append(dummy)
 
 centralbody = Particle(width/2, height/2, 400, 10)
@@ -144,14 +145,17 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            miniguy = Particle(width/3, height-100, 2, 10, 0, .5)
-            sprites[0] = miniguy
+            miniguy = Particle(width/3, height-100, 20, 10, 0, .5)
+            # if sprites[0] is dummy:
+            #     sprites[0] = miniguy
+            # else: sprites.append(miniguy)
+            sprites.append(miniguy)
+            sprites.append(sprites.pop(sprites.index([x for x in sprites if x is dummy][0])))
 
     # Wipes screen every time to avoid clipping and stuff
     screen.fill(white)
 
     for i, sprite in enumerate(sprites):
-        sprite.display()
         for particle in sprites[i+1:]:
             collided = collide(sprite, particle)
             if collided:
@@ -161,9 +165,13 @@ while not done:
             gForce = sprite.move(particle)
 
             # for debugging force: elastic-esque line that shows the force between to centers of mass
-            print(int(gForce*(10**3)))
-            pygame.draw.line(screen, black, (int(sprite.x), int(sprite.y)), (int(particle.x), int(particle.y)), int(m.log2(gForce*(10**3))))
+            # print(int(gForce*(10**3)))
+            print(gForce)
 
+            if sprite or particle is not dummy:
+                pygame.draw.line(screen, black, (int(sprite.x), int(sprite.y)), (int(particle.x), int(particle.y)), 1)
+                # pygame.draw.line(screen, black, (int(particle.x), int(particle.y)), (int(sprite.x), int(sprite.y)), int(m.log2(gForce*(10**3))))
+        sprite.display()
 
     # Display graphics
     pygame.display.flip()
