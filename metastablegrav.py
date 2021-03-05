@@ -42,7 +42,7 @@ elasticity = 1 # Completely arbitrary, edit at leisure
 #                                   PYGAME OBJECTS
 #--------------------------------------------------------------------------------------#
 class Particle():
-    def __init__(self, x, y, mass, size, angle=r.uniform(0, m.pi), speed=0):
+    def __init__(self, x, y, mass, size, angle=0, speed=0):
         self.x = x; self.y = y
         self.mass = mass
         self.size = size
@@ -129,8 +129,8 @@ sprites = []
 dummy = Particle(width+10, height+10, 0, 0)
 sprites.append(dummy)
 
-centralbody = Particle(width/2, height/2, 400, 10)
-sprites.append(centralbody)
+# centralbody = Particle(width/2, height/2, 1000, 20)
+# sprites.append(centralbody)
 
 # Do NOT remove
 # dummy = Particle(width+10, height+10, 0.00001, 0)
@@ -145,12 +145,13 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            miniguy = Particle(width/3, height-100, 20, 10, 0, .5)
+            for i in range(10):
+                miniguy = Particle(r.uniform(0, width), r.uniform(10, height-10), mass=50, size=r.randint(8, 12), angle=r.uniform(0, m.pi), speed=r.uniform(0.10, 0.15))
             # if sprites[0] is dummy:
             #     sprites[0] = miniguy
             # else: sprites.append(miniguy)
-            sprites.append(miniguy)
-            sprites.append(sprites.pop(sprites.index([x for x in sprites if x is dummy][0])))
+                sprites.append(miniguy)
+                sprites.append(sprites.pop(sprites.index([x for x in sprites if x is dummy][0])))
 
     # Wipes screen every time to avoid clipping and stuff
     screen.fill(white)
@@ -159,8 +160,12 @@ while not done:
         for particle in sprites[i+1:]:
             collided = collide(sprite, particle)
             if collided:
-                sprites.remove(sprite)
-                sprites.remove(particle)
+                if sprite.mass < particle.mass:
+                    sprites.remove(sprite)
+                elif sprite.mass == particle.mass:
+                    pass
+                else:
+                    sprites.remove(particle)
                 # pass
             gForce = sprite.move(particle)
 
@@ -169,8 +174,12 @@ while not done:
             print(gForce)
 
             if sprite or particle is not dummy:
-                pygame.draw.line(screen, black, (int(sprite.x), int(sprite.y)), (int(particle.x), int(particle.y)), 1)
+                try:
+                    pygame.draw.line(screen, black, (int(sprite.x), int(sprite.y)), (int(particle.x), int(particle.y)), int(m.log2((gForce*(10**3)))))
+                except ValueError:
+                    pass
                 # pygame.draw.line(screen, black, (int(particle.x), int(particle.y)), (int(sprite.x), int(sprite.y)), int(m.log2(gForce*(10**3))))
+
         sprite.display()
 
     # Display graphics
