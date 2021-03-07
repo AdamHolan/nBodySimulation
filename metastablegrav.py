@@ -126,8 +126,8 @@ sprites = []
 # miniguy = Particle(width/3, height-100, 2, 10, 0, .6)
 # sprites.append(miniguy)
 # Do NOT remove
-dummy = Particle(width+10, height+10, 0, 0)
-sprites.append(dummy)
+# dummy = Particle(width+10, height+10, 0, 0)
+# sprites.append(dummy)
 
 # centralbody = Particle(width/2, height/2, 1000, 20)
 # sprites.append(centralbody)
@@ -145,30 +145,33 @@ while not done:
         if event.type == pygame.QUIT:
             done = True
         if event.type == pygame.MOUSEBUTTONDOWN:
-            for i in range(10):
-                miniguy = Particle(r.uniform(0, width), r.uniform(10, height-10), mass=50, size=r.randint(8, 12), angle=r.uniform(0, m.pi), speed=r.uniform(0.10, 0.15))
+            sprites.append(Particle(200, 0, mass=500, size=10, angle=-m.pi, speed=.1))
+            sprites.append(Particle(width - 200, height, mass=500, size=10, angle=0, speed=.1))
+            # for i in range(10):
+                # miniguy = Particle(r.uniform(0, width), r.uniform(10, height-10), mass=50, size=r.randint(8, 12), angle=r.uniform(0, m.pi), speed=r.uniform(0.10, 0.15))
             # if sprites[0] is dummy:
             #     sprites[0] = miniguy
             # else: sprites.append(miniguy)
-                sprites.append(miniguy)
-                sprites.append(sprites.pop(sprites.index([x for x in sprites if x is dummy][0])))
+            # sprites.append(miniguy)
+            # sprites.append(sprites.pop(sprites.index([x for x in sprites if x is dummy][0])))
 
     # Wipes screen every time to avoid clipping and stuff
     screen.fill(white)
 
     for i, sprite in enumerate(sprites):
-        for particle in sprites[i+1:]:
-            collided = collide(sprite, particle)
-            if collided:
-                if sprite.mass < particle.mass:
-                    sprites.remove(sprite)
-                elif sprite.mass == particle.mass:
-                    pass
-                else:
-                    sprites.remove(particle)
-                # pass
-            gForce = sprite.move(particle)
-
+        for particle in sprites:
+            if sprite is not particle:
+                collided = collide(sprite, particle)
+                if collided:
+                    if sprite.mass < particle.mass:
+                        sprites.remove(sprite)
+                    elif sprite.mass == particle.mass:
+                        pass
+                    else:
+                        sprites.remove(particle)
+                    # pass
+                gForce = sprite.move(particle)
+            else: gForce = 0
             # for debugging force: elastic-esque line that shows the force between to centers of mass
             # print(int(gForce*(10**3)))
             print(gForce)
@@ -186,4 +189,4 @@ while not done:
     pygame.display.flip()
 
 
-    clock.tick(60)
+    clock.tick(120)
